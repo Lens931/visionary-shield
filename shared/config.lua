@@ -26,7 +26,7 @@ zVS.Config = {
                     timeline = 'Timeline', noRecentEvent = 'No recent event for the selected player.', empty = 'Nothing to display yet.'
                 },
                 actions = {
-                    inspect = 'Inspect', pin = 'Pin', spectate = 'Spectate', goto = 'Goto', bring = 'Bring', freeze = 'Freeze', heal = 'Heal', capture = 'Capture', warn = 'Warn', kick = 'Kick', ban = 'Ban', noclip = 'NoClip', ui = 'UI', validate = 'Confirm', cancel = 'Cancel'
+                    inspect = 'Inspect', pin = 'Pin', spectate = 'Spectate', ['goto'] = 'Goto', bring = 'Bring', freeze = 'Freeze', heal = 'Heal', capture = 'Capture', warn = 'Warn', kick = 'Kick', ban = 'Ban', noclip = 'NoClip', ui = 'UI', validate = 'Confirm', cancel = 'Cancel'
                 },
                 inspector = {
                     title = 'Player', name = 'Name', id = 'ID', health = 'Health', armor = 'Armor', speed = 'Speed', ping = 'Ping', risk = 'Risk', position = 'Position', vehicle = 'Vehicle', protection = 'Protection'
@@ -56,7 +56,7 @@ zVS.Config = {
                     timeline = 'Timeline', noRecentEvent = 'Aucun événement récent lié au joueur sélectionné.', empty = 'Rien à afficher pour le moment.'
                 },
                 actions = {
-                    inspect = 'Inspect', pin = 'Pin', spectate = 'Spectate', goto = 'Goto', bring = 'Bring', freeze = 'Freeze', heal = 'Heal', capture = 'Capture', warn = 'Warn', kick = 'Kick', ban = 'Ban', noclip = 'NoClip', ui = 'UI', validate = 'Valider', cancel = 'Annuler'
+                    inspect = 'Inspect', pin = 'Pin', spectate = 'Spectate', ['goto'] = 'Goto', bring = 'Bring', freeze = 'Freeze', heal = 'Heal', capture = 'Capture', warn = 'Warn', kick = 'Kick', ban = 'Ban', noclip = 'NoClip', ui = 'UI', validate = 'Valider', cancel = 'Annuler'
                 },
                 inspector = {
                     title = 'Joueur', name = 'Nom', id = 'ID', health = 'Santé', armor = 'Armure', speed = 'Vitesse', ping = 'Ping', risk = 'Risque', position = 'Position', vehicle = 'Véhicule', protection = 'Protection'
