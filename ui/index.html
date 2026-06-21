@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr" class="zvs-nui nui-closed">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visionary Shield — Admin</title>
+    <link rel="stylesheet" href="style.css?v=163-customer-release" />
+    <script defer src="translations.js?v=163-customer-release"></script>
+    <script defer src="app.js?v=163-customer-release"></script>
+</head>
+<body class="nui-closed">
+    <div id="app" class="zvs-root is-hidden" aria-hidden="true">
+        <section class="zvs-window zvs-main" data-window-id="main" role="dialog" aria-label="Visionary Shield Admin">
+            <header class="zvs-titlebar" data-drag-handle>
+                <div class="zvs-brand">
+                    <span class="zvs-mark">VS</span>
+                    <div>
+                        <strong>Visionary Shield</strong>
+                        <small id="runtimeSubtitle">production_zerofootprint</small>
+                    </div>
+                </div>
+                <div class="zvs-topstats" aria-label="Overview serveur">
+                    <span class="zvs-chip"><b id="statPlayers">0</b> joueurs</span>
+                    <span class="zvs-chip"><b id="statRisk">0</b> risque</span>
+                    <span class="zvs-chip"><b id="statBans">0</b> bans</span>
+                    <span class="zvs-chip" id="statRuntime">prod</span>
+                </div>
+                <div class="zvs-window-tools">
+                    <label class="zvs-opacity" title="Opacité fenêtre">
+                        <span>α</span>
+                        <input type="range" min="45" max="100" value="94" data-window-opacity="main" />
+                    </label>
+                    <button type="button" class="zvs-icon" data-action="refresh" title="Refresh manuel">↻</button>
+                    <button type="button" class="zvs-icon" data-window-lock="main" title="Verrouiller déplacement/redimensionnement">◇</button>
+                    <button type="button" class="zvs-icon" data-window-minimize="main" title="Réduire">−</button>
+                    <button type="button" class="zvs-icon" data-window-maximize="main" title="Maximiser/restaurer">□</button>
+                    <button type="button" class="zvs-icon zvs-danger" data-close-panel title="Fermer">×</button>
+                </div>
+            </header>
+
+            <div class="zvs-window-body zvs-main-body">
+                <aside class="zvs-pane zvs-players">
+                    <div class="zvs-pane-head">
+                        <strong>Joueurs</strong>
+                        <span id="playerCount" class="zvs-muted">0</span>
+                    </div>
+                    <div class="zvs-controls zvs-controls-grid">
+                        <input id="playerSearch" class="zvs-input" type="search" autocomplete="off" placeholder="Nom, ID, ping…" />
+                        <select id="playerRiskFilter" class="zvs-input">
+                            <option value="all">Tous</option>
+                            <option value="risk">Risk</option>
+                            <option value="vehicle">Véhicule</option>
+                            <option value="protected">Protégés</option>
+                        </select>
+                    </div>
+                    <div id="playerList" class="zvs-list" role="listbox" aria-label="Joueurs connectés"></div>
+                </aside>
+
+                <main class="zvs-pane zvs-center">
+                    <div class="zvs-tabs" role="tablist">
+                        <button class="is-active" data-tab="overview" type="button">Overview</button>
+                        <button data-tab="risk" type="button">Risk</button>
+                        <button data-tab="history" type="button">Audit</button>
+                        <button data-tab="defenses" type="button">Runtime</button>
+                    </div>
+                    <section class="zvs-tab-panel is-active" data-tab-panel="overview">
+                        <div class="zvs-section-title">
+                            <strong id="selectedTitle">Aucun joueur sélectionné</strong>
+                            <span id="selectedSubtitle" class="zvs-muted">Sélectionne un joueur à gauche.</span>
+                        </div>
+                        <div class="zvs-metrics" id="selectedMetrics"></div>
+                        <div class="zvs-decision-box">
+                            <div>
+                                <span class="zvs-label">Staff read</span>
+                                <strong id="decisionText">Observe</strong>
+                            </div>
+                            <p id="decisionDetails">Lecture seule côté UI. Le staff garde la décision.</p>
+                        </div>
+                        <div class="zvs-mini-feed" id="selectedTimeline"></div>
+                    </section>
+                    <section class="zvs-tab-panel" data-tab-panel="risk">
+                        <div class="zvs-section-title"><strong>Top risque</strong><span class="zvs-muted">tri serveur</span></div>
+                        <div id="riskTopList" class="zvs-tablelike"></div>
+                        <div class="zvs-section-title zvs-mt"><strong>Approbations</strong><span id="approvalCount" class="zvs-muted">0</span></div>
+                        <div id="approvalList" class="zvs-mini-feed"></div>
+                    </section>
+                    <section class="zvs-tab-panel" data-tab-panel="history">
+                        <div class="zvs-section-title"><strong>Audit récent</strong><span id="auditCount" class="zvs-muted">0</span></div>
+                        <div id="auditList" class="zvs-mini-feed"></div>
+                    </section>
+                    <section class="zvs-tab-panel" data-tab-panel="defenses">
+                        <div class="zvs-section-title"><strong>Runtime réel</strong><span class="zvs-muted">pas d’options fantômes</span></div>
+                        <div id="featureMatrix" class="zvs-feature-grid"></div>
+                        <div class="zvs-section-title zvs-mt"><strong>Runtime</strong><span class="zvs-muted">états serveur</span></div>
+                        <div id="defenseList" class="zvs-tablelike"></div>
+                    </section>
+                </main>
+
+                <aside class="zvs-pane zvs-right">
+                    <div class="zvs-tabs zvs-tabs-small" role="tablist">
+                        <button class="is-active" data-right-tab="alerts" type="button">Alertes</button>
+                        <button data-right-tab="notes" type="button">Notes</button>
+                        <button data-right-tab="bans" type="button">Bans</button>
+                        <button data-right-tab="damage" type="button">Damage</button>
+                    </div>
+                    <section class="zvs-right-panel is-active" data-right-panel="alerts"><div id="alertFeed" class="zvs-mini-feed"></div></section>
+                    <section class="zvs-right-panel" data-right-panel="notes">
+                        <textarea id="noteInput" class="zvs-textarea" maxlength="400" placeholder="Note staff sur le joueur sélectionné…"></textarea>
+                        <button id="saveNoteBtn" class="zvs-btn zvs-btn-primary" type="button">Ajouter note</button>
+                        <div id="notesFeed" class="zvs-mini-feed"></div>
+                    </section>
+                    <section class="zvs-right-panel" data-right-panel="bans"><div id="banList" class="zvs-mini-feed"></div></section>
+                    <section class="zvs-right-panel" data-right-panel="damage"><div id="damageFeed" class="zvs-mini-feed"></div></section>
+                </aside>
+            </div>
+
+            <footer class="zvs-bottom-actions">
+                <button class="zvs-btn" data-player-action="inspect" type="button">Inspect</button>
+                <button class="zvs-btn" data-player-action="spectate" type="button">Spectate</button>
+                <button class="zvs-btn" data-player-action="goto" type="button">Goto</button>
+                <button class="zvs-btn" data-player-action="bring" type="button">Bring</button>
+                <button class="zvs-btn" data-player-action="freeze" type="button">Freeze</button>
+                <button class="zvs-btn" data-player-action="heal" type="button">Heal</button>
+                <button class="zvs-btn" data-player-action="screenshot" type="button">Capture</button>
+                <button class="zvs-btn" data-player-action="warn" type="button">Warn</button>
+                <button class="zvs-btn zvs-danger-soft" data-player-action="kick" type="button">Kick</button>
+                <button class="zvs-btn zvs-danger-soft" data-player-action="ban" type="button">Ban</button>
+                <span class="zvs-spacer"></span>
+                <button id="noclipBtn" class="zvs-btn zvs-btn-primary" type="button">NoClip</button>
+                <button id="settingsBtn" class="zvs-btn" type="button">UI</button>
+            </footer>
+            <div class="zvs-resize" data-resize-handle></div>
+        </section>
+
+        <section class="zvs-window zvs-inspector is-hidden" data-window-id="playerInspector" role="dialog" aria-label="Inspecteur joueur">
+            <header class="zvs-titlebar" data-drag-handle>
+                <div class="zvs-brand zvs-brand-small"><span class="zvs-mark">ID</span><strong id="inspectorTitle">Joueur</strong></div>
+                <div class="zvs-window-tools">
+                    <label class="zvs-opacity"><span>α</span><input type="range" min="45" max="100" value="92" data-window-opacity="playerInspector" /></label>
+                    <button type="button" class="zvs-icon" data-window-lock="playerInspector">◇</button>
+                    <button type="button" class="zvs-icon" data-window-minimize="playerInspector">−</button>
+                    <button type="button" class="zvs-icon" data-window-maximize="playerInspector">□</button>
+                    <button type="button" class="zvs-icon zvs-danger" data-window-hide="playerInspector">×</button>
+                </div>
+            </header>
+            <div class="zvs-window-body">
+                <div id="inspectorBody" class="zvs-inspector-grid">
+                    <div class="zvs-kv"><span>Nom</span><strong data-inspector-value="name">—</strong></div>
+                    <div class="zvs-kv"><span>ID</span><strong data-inspector-value="id">—</strong></div>
+                    <div class="zvs-kv"><span>Santé</span><strong data-inspector-value="health">—</strong></div>
+                    <div class="zvs-kv"><span>Armure</span><strong data-inspector-value="armor">—</strong></div>
+                    <div class="zvs-kv"><span>Vitesse</span><strong data-inspector-value="speed">—</strong></div>
+                    <div class="zvs-kv"><span>Ping</span><strong data-inspector-value="ping">—</strong></div>
+                    <div class="zvs-kv"><span>Risque</span><strong data-inspector-value="risk">—</strong></div>
+                    <div class="zvs-kv"><span>Position</span><strong data-inspector-value="coords">—</strong></div>
+                    <div class="zvs-kv"><span>Véhicule</span><strong data-inspector-value="vehicle">—</strong></div>
+                    <div class="zvs-kv"><span>Protection</span><strong data-inspector-value="protection">—</strong></div>
+                </div>
+                <div class="zvs-inline-actions">
+                    <button class="zvs-btn" data-player-action="inspect" type="button">Pin</button>
+                    <button class="zvs-btn" data-player-action="spectate" type="button">Spectate</button>
+                    <button class="zvs-btn" data-player-action="goto" type="button">Goto</button>
+                    <button class="zvs-btn" data-player-action="freeze" type="button">Freeze</button>
+                    <button class="zvs-btn zvs-danger-soft" data-player-action="kick" type="button">Kick</button>
+                </div>
+            </div>
+            <div class="zvs-resize" data-resize-handle></div>
+        </section>
+
+        <section class="zvs-window zvs-spectate is-hidden" data-window-id="spectateInfo" role="dialog" aria-label="Spectate">
+            <header class="zvs-titlebar" data-drag-handle>
+                <div class="zvs-brand zvs-brand-small"><span class="zvs-mark">SP</span><strong>Spectate</strong></div>
+                <div class="zvs-window-tools">
+                    <label class="zvs-opacity"><span>α</span><input type="range" min="45" max="100" value="92" data-window-opacity="spectateInfo" /></label>
+                    <button type="button" class="zvs-icon" data-window-lock="spectateInfo">◇</button>
+                    <button type="button" class="zvs-icon" data-window-minimize="spectateInfo">−</button>
+                    <button type="button" class="zvs-icon" data-window-hide="spectateInfo">×</button>
+                </div>
+            </header>
+            <div class="zvs-window-body">
+                <div id="spectateBody" class="zvs-spectate-body">Spectate inactif</div>
+                <div class="zvs-inline-actions">
+                    <button class="zvs-btn" data-spectate-action="previous" type="button">← Préc.</button>
+                    <button class="zvs-btn" data-spectate-action="next" type="button">Suiv. →</button>
+                    <button class="zvs-btn" data-action="refresh" type="button">Refresh</button>
+                    <button class="zvs-btn" data-player-action="screenshot" type="button">Capture</button>
+                    <button class="zvs-btn zvs-danger-soft" data-spectate-action="exit" type="button">Quitter</button>
+                </div>
+            </div>
+            <div class="zvs-resize" data-resize-handle></div>
+        </section>
+
+        <section class="zvs-window zvs-settings is-hidden" data-window-id="settings" role="dialog" aria-label="UI Settings UI">
+            <header class="zvs-titlebar" data-drag-handle>
+                <div class="zvs-brand zvs-brand-small"><span class="zvs-mark">UI</span><strong>UI Settings</strong></div>
+                <div class="zvs-window-tools">
+                    <label class="zvs-opacity"><span>α</span><input type="range" min="45" max="100" value="94" data-window-opacity="settings" /></label>
+                    <button type="button" class="zvs-icon" data-window-lock="settings">◇</button>
+                    <button type="button" class="zvs-icon" data-window-minimize="settings">−</button>
+                    <button type="button" class="zvs-icon" data-window-maximize="settings">□</button>
+                    <button type="button" class="zvs-icon zvs-danger" data-window-hide="settings">×</button>
+                </div>
+            </header>
+            <div class="zvs-window-body zvs-settings-body">
+                <div class="zvs-settings-section">
+                    <div class="zvs-settings-section-head">
+                        <strong>Interface</strong>
+                        <span class="zvs-muted">actif</span>
+                    </div>
+                    <label class="zvs-field zvs-field-range">
+                        <span>Scale</span>
+                        <input id="uiScale" type="range" min="75" max="135" value="100" />
+                        <b id="uiScaleValue">100%</b>
+                    </label>
+                    <label class="zvs-field zvs-field-range">
+                        <span>Texte</span>
+                        <input id="uiTextScale" type="range" min="85" max="125" value="100" />
+                        <b id="uiTextScaleValue">100%</b>
+                    </label>
+                    <label class="zvs-field">
+                        <span>Theme</span>
+                        <select id="themeSelect" class="zvs-input">
+                            <option value="visionary_dark">Visionary dark</option>
+                            <option value="deep_blue">Deep blue</option>
+                            <option value="neutral_debug">Neutral debug</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="zvs-settings-section">
+                    <div class="zvs-settings-section-head">
+                        <strong>Fenêtres</strong>
+                        <span class="zvs-muted">persistant</span>
+                    </div>
+                    <label class="zvs-switch"><input id="compactMode" type="checkbox" checked /><span>Compact mode</span></label>
+                    <label class="zvs-switch"><input id="dockVisible" type="checkbox" /><span>Dock flottant rapide</span></label>
+                    <p id="settingsStatus" class="zvs-settings-note">Le dashboard peut se fermer sans fermer les fenêtres flottantes. La visibilité est runtime ; position, taille, lock et opacité restent sauvegardés.</p>
+                </div>
+                <div class="zvs-settings-actions">
+                    <button id="resetUiBtn" class="zvs-btn zvs-danger-soft" type="button">Reset UI</button>
+                    <button id="saveUiBtn" class="zvs-btn zvs-btn-primary" type="button">Sauvegarder maintenant</button>
+                </div>
+            </div>
+            <div class="zvs-resize" data-resize-handle></div>
+        </section>
+
+        <section class="zvs-window zvs-dock is-hidden" data-window-id="adminDock" role="dialog" aria-label="Outils rapides admin">
+            <header class="zvs-titlebar" data-drag-handle>
+                <div class="zvs-brand zvs-brand-small"><span class="zvs-mark">QT</span><strong>Outils rapides</strong></div>
+                <div class="zvs-window-tools">
+                    <label class="zvs-opacity" title="Opacité fenêtre"><span>α</span><input type="range" min="45" max="100" value="90" data-window-opacity="adminDock" /></label>
+                    <button type="button" class="zvs-icon" data-window-lock="adminDock" title="Verrouiller">◇</button>
+                    <button type="button" class="zvs-icon" data-window-minimize="adminDock" title="Réduire">−</button>
+                    <button type="button" class="zvs-icon zvs-danger" data-window-hide="adminDock" title="Fermer la fenêtre">×</button>
+                </div>
+            </header>
+            <div class="zvs-window-body zvs-dock-body">
+                <div class="zvs-dock-section">
+                    <div class="zvs-dock-section-head">
+                        <strong>Outils rapides</strong>
+                        <span class="zvs-muted">live</span>
+                    </div>
+                    <div class="zvs-dock-actions">
+                        <button type="button" class="zvs-dock-action" data-action="refresh" title="Rafraîchir les données du panneau">
+                            <span class="zvs-dock-action-icon">↻</span>
+                            <span class="zvs-dock-action-copy"><strong>Rafraîchir</strong><small>Mettre à jour les données</small></span>
+                        </button>
+                        <button type="button" class="zvs-dock-action" data-player-action="inspect" title="Afficher ou épingler l'inspecteur joueur">
+                            <span class="zvs-dock-action-icon">⌗</span>
+                            <span class="zvs-dock-action-copy"><strong>Inspecteur</strong><small id="dockSelectionLabel">Aucun joueur sélectionné</small></span>
+                        </button>
+                        <button type="button" class="zvs-dock-action" data-player-action="spectate" title="Observer le joueur sélectionné">
+                            <span class="zvs-dock-action-icon">◎</span>
+                            <span class="zvs-dock-action-copy"><strong>Spectate</strong><small>Suivre la cible</small></span>
+                        </button>
+                        <button type="button" class="zvs-dock-action" data-player-action="goto" title="Se téléporter au joueur sélectionné">
+                            <span class="zvs-dock-action-icon">⌖</span>
+                            <span class="zvs-dock-action-copy"><strong>Goto</strong><small>Aller sur la cible</small></span>
+                        </button>
+                        <button type="button" class="zvs-dock-action" id="dockNoclipBtn" title="Activer ou couper le NoClip staff">
+                            <span class="zvs-dock-action-icon">N</span>
+                            <span class="zvs-dock-action-copy"><strong>NoClip</strong><small id="dockNoclipHint">Indisponible</small></span>
+                        </button>
+                        <button type="button" class="zvs-dock-action" id="dockSettingsBtn" title="Ouvrir les paramètres d'interface">
+                            <span class="zvs-dock-action-icon">⚙</span>
+                            <span class="zvs-dock-action-copy"><strong>Paramètres UI</strong><small>Échelle, thème et fenêtres</small></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="zvs-dock-section zvs-dock-section-secondary">
+                    <div class="zvs-dock-section-head">
+                        <strong>Fenêtres</strong>
+                        <span class="zvs-muted">runtime</span>
+                    </div>
+                    <div class="zvs-dock-footer-actions">
+                        <button type="button" class="zvs-btn" data-close-panel title="Fermer seulement le dashboard">Fermer dashboard</button>
+                        <button type="button" class="zvs-btn" data-window-hide="adminDock" title="Masquer le dock">Masquer dock</button>
+                    </div>
+                </div>
+            </div>
+            <div class="zvs-resize" data-resize-handle></div>
+        </section>
+
+
+        <div id="modalLayer" class="zvs-modal-layer is-hidden" aria-hidden="true">
+            <section id="actionDialog" class="zvs-modal-card is-hidden" role="dialog" aria-label="Action staff">
+                <header class="zvs-modal-head">
+                    <div><strong id="actionDialogTitle">Action staff</strong><span id="actionDialogSubtitle">Cible</span></div>
+                    <button type="button" id="actionDialogClose" class="zvs-icon zvs-danger" title="Fermer">×</button>
+                </header>
+                <div class="zvs-modal-body">
+                    <label class="zvs-modal-label" for="actionReason">Motif</label>
+                    <textarea id="actionReason" class="zvs-textarea zvs-modal-textarea" maxlength="500" placeholder="Indique un motif clair et court…"></textarea>
+                    <p id="actionDialogHint" class="zvs-settings-note">Cette action sera envoyée au backend zVS. Aucun prompt navigateur n’est utilisé.</p>
+                </div>
+                <footer class="zvs-modal-actions">
+                    <button type="button" id="actionDialogCancel" class="zvs-btn">Annuler</button>
+                    <button type="button" id="actionDialogConfirm" class="zvs-btn zvs-btn-primary">Valider</button>
+                </footer>
+            </section>
+
+            <section id="noticeDialog" class="zvs-modal-card zvs-notice-card is-hidden" role="dialog" aria-label="Notification staff">
+                <header class="zvs-modal-head">
+                    <div><strong id="noticeTitle">Visionary Shield</strong><span id="noticeSubtitle">Notification staff</span></div>
+                </header>
+                <div class="zvs-modal-body">
+                    <p id="noticeMessage" class="zvs-notice-message">Message administratif.</p>
+                </div>
+                <footer class="zvs-modal-actions">
+                    <button type="button" id="noticeClose" class="zvs-btn zvs-btn-primary">J’ai compris</button>
+                </footer>
+            </section>
+            <section id="screenshotDialog" class="zvs-modal-card zvs-screenshot-card is-hidden" role="dialog" aria-label="Capture joueur">
+                <header class="zvs-modal-head">
+                    <div><strong id="screenshotTitle">Capture reçue</strong><span id="screenshotSubtitle">Evidence</span></div>
+                    <button type="button" id="screenshotCloseTop" class="zvs-icon zvs-danger" title="Fermer">×</button>
+                </header>
+                <div class="zvs-modal-body">
+                    <div class="zvs-screenshot-preview"><img id="screenshotImage" alt="Capture joueur" /></div>
+                    <p id="screenshotMeta" class="zvs-settings-note">Capture disponible.</p>
+                </div>
+                <footer class="zvs-modal-actions">
+                    <button type="button" id="screenshotClose" class="zvs-btn zvs-btn-primary">Fermer</button>
+                </footer>
+            </section>
+        </div>
+
+        <div id="toastStack" class="zvs-toasts" aria-live="polite"></div>
+    </div>
+</body>
+</html>
