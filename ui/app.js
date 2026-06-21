@@ -49,6 +49,7 @@
         notice: { active: false, title: '', subtitle: '', message: '', severity: 'info' },
         screenshot: { active: false, image: '', title: '', subtitle: '', meta: '' },
         textInputActive: false,
+        locale: { current: 'en', fallback: 'en', strings: {}, fallbackStrings: {} },
         refs: { inspector: {} },
     };
 
@@ -91,6 +92,125 @@
     function sanitizeText(value, fallback = '—') {
         if (value === null || value === undefined || value === '') return fallback;
         return String(value);
+    }
+
+    function getPathValue(object, path) {
+        if (!object || !path) return undefined;
+        return String(path).split('.').reduce((acc, part) => (acc && typeof acc === 'object') ? acc[part] : undefined, object);
+    }
+
+    function L(key, fallback = '') {
+        const value = getPathValue(state.locale.strings, key);
+        if (typeof value === 'string') return value;
+        const fallbackValue = getPathValue(state.locale.fallbackStrings, key);
+        if (typeof fallbackValue === 'string') return fallbackValue;
+        return fallback || key;
+    }
+
+    function setAttrIfChanged(el, attr, value) {
+        if (!el) return;
+        const text = sanitizeText(value, '');
+        if (el.getAttribute(attr) !== text) el.setAttribute(attr, text);
+    }
+
+    function applyRuntimeLocalization(runtime) {
+        const loc = runtime?.localization || runtime?.runtimeConfig?.localization;
+        if (!loc || loc.enabled === false) return;
+        state.locale.current = sanitizeText(loc.locale, 'en').toLowerCase();
+        state.locale.fallback = sanitizeText(loc.fallback, 'en').toLowerCase();
+        state.locale.strings = (loc.strings && typeof loc.strings === 'object') ? loc.strings : {};
+        state.locale.fallbackStrings = (loc.fallbackStrings && typeof loc.fallbackStrings === 'object') ? loc.fallbackStrings : {};
+        document.documentElement.lang = state.locale.current;
+    }
+
+    function applyLocaleTexts() {
+        const textMap = [
+            ['#statPlayersLabel', 'app.players', 'joueurs'],
+            ['#statRiskLabel', 'app.risk', 'risque'],
+            ['#statBansLabel', 'app.bans', 'bans'],
+            ['#playerPaneTitle', 'main.playersTitle', 'Joueurs'],
+            ['[data-tab="overview"]', 'main.overview', 'Overview'],
+            ['[data-tab="risk"]', 'main.risk', 'Risk'],
+            ['[data-tab="history"]', 'main.history', 'Audit'],
+            ['[data-tab="defenses"]', 'main.defenses', 'Runtime'],
+            ['[data-right-tab="alerts"]', 'main.alerts', 'Alertes'],
+            ['[data-right-tab="notes"]', 'main.notes', 'Notes'],
+            ['[data-right-tab="bans"]', 'main.bans', 'Bans'],
+            ['[data-right-tab="damage"]', 'main.damage', 'Damage'],
+            ['#saveNoteBtn', 'main.addNote', 'Ajouter note'],
+            ['#settingsTitle', 'settings.title', 'UI Settings'],
+            ['#settingsInterfaceTitle', 'settings.interface', 'Interface'],
+            ['#settingsInterfaceStatus', 'settings.active', 'actif'],
+            ['#settingsScaleLabel', 'settings.scale', 'Scale'],
+            ['#settingsTextLabel', 'settings.text', 'Texte'],
+            ['#settingsThemeLabel', 'settings.theme', 'Theme'],
+            ['#settingsLocaleLabel', 'settings.language', 'Language'],
+            ['#settingsLocaleHint', 'settings.languageHint', 'configured in shared/config.lua'],
+            ['#settingsWindowsTitle', 'settings.windows', 'Fenêtres'],
+            ['#settingsWindowsStatus', 'settings.persistent', 'persistant'],
+            ['#compactModeLabel', 'settings.compact', 'Compact mode'],
+            ['#dockVisibleLabel', 'settings.dock', 'Dock flottant rapide'],
+            ['#settingsStatus', 'settings.note', 'Le dashboard peut se fermer sans fermer les fenêtres flottantes.'],
+            ['#resetUiBtn', 'settings.reset', 'Reset UI'],
+            ['#saveUiBtn', 'settings.save', 'Sauvegarder maintenant'],
+            ['#dockTitle', 'dock.title', 'Outils rapides'],
+            ['#dockSectionTitle', 'dock.title', 'Outils rapides'],
+            ['#dockLiveLabel', 'dock.live', 'live'],
+            ['#dockRefreshTitle', 'app.refresh', 'Refresh'],
+            ['#dockRefreshHint', 'dock.refreshHint', 'Mettre à jour les données'],
+            ['#dockInspectorTitle', 'actions.inspect', 'Inspect'],
+            ['#dockSpectateTitle', 'actions.spectate', 'Spectate'],
+            ['#dockSpectateHint', 'dock.spectateHint', 'Suivre la cible'],
+            ['#dockGotoTitle', 'actions.goto', 'Goto'],
+            ['#dockGotoHint', 'dock.gotoHint', 'Aller sur la cible'],
+            ['#dockNoclipTitle', 'actions.noclip', 'NoClip'],
+            ['#dockSettingsTitle', 'settings.title', 'Paramètres UI'],
+            ['#dockSettingsHint', 'dock.settingsHint', 'Échelle, thème et fenêtres'],
+            ['#dockWindowsTitle', 'settings.windows', 'Fenêtres'],
+            ['#dockRuntimeLabel', 'dock.runtime', 'runtime'],
+            ['#dockCloseDashboardBtn', 'dock.closeDashboard', 'Fermer dashboard'],
+            ['#dockHideBtn', 'dock.hideDock', 'Masquer dock'],
+            ['#actionDialogTitle', 'dialogs.staffAction', 'Action staff'],
+            ['#actionDialogSubtitle', 'dialogs.target', 'Cible'],
+            ['#actionDialogReasonLabel', 'dialogs.reason', 'Motif'],
+            ['#actionDialogHint', 'dialogs.actionHint', 'Cette action sera envoyée au backend zVS.'],
+            ['#actionDialogCancel', 'actions.cancel', 'Annuler'],
+            ['#actionDialogConfirm', 'actions.validate', 'Valider'],
+            ['#noticeClose', 'dialogs.understood', 'J’ai compris'],
+            ['#screenshotTitle', 'dialogs.screenshotReceived', 'Capture reçue'],
+            ['#screenshotSubtitle', 'dialogs.evidence', 'Evidence'],
+            ['#screenshotMeta', 'dialogs.screenshotAvailable', 'Capture disponible.'],
+            ['#screenshotClose', 'app.close', 'Fermer'],
+        ];
+        textMap.forEach(([selector, key, fallback]) => $$(selector).forEach(el => setTextIfChanged(el, L(key, fallback))));
+        const attrMap = [
+            ['#playerSearch', 'placeholder', 'main.search', 'Nom, ID, ping...'],
+            ['#noteInput', 'placeholder', 'main.notePlaceholder', 'Note staff sur le joueur sélectionné...'],
+            ['#actionReason', 'placeholder', 'dialogs.reasonPlaceholder', 'Indique un motif clair et court...'],
+        ];
+        attrMap.forEach(([selector, attr, key, fallback]) => setAttrIfChanged($(selector), attr, L(key, fallback)));
+        const filterOptions = {
+            all: L('main.all', 'Tous'), risk: L('main.risk', 'Risk'), vehicle: L('main.vehicle', 'Véhicule'), protected: L('main.protected', 'Protégés')
+        };
+        $$('#playerRiskFilter option').forEach(opt => { if (filterOptions[opt.value]) setTextIfChanged(opt, filterOptions[opt.value]); });
+        const inspectorLabels = ['name','id','health','armor','speed','ping','risk','position','vehicle','protection'];
+        inspectorLabels.forEach(key => $(`[data-inspector-label="${key}"]`) && setTextIfChanged($(`[data-inspector-label="${key}"]`), L(`inspector.${key}`, key)));
+        setTextIfChanged($('#settingsLocaleValue'), state.locale.current.toUpperCase());
+        renderActionLabels();
+    }
+
+    function renderActionLabels() {
+        const actionLabels = {
+            inspect: L('actions.inspect', 'Inspect'), spectate: L('actions.spectate', 'Spectate'), goto: L('actions.goto', 'Goto'), bring: L('actions.bring', 'Bring'),
+            freeze: L('actions.freeze', 'Freeze'), heal: L('actions.heal', 'Heal'), screenshot: L('actions.capture', 'Capture'), warn: L('actions.warn', 'Warn'), kick: L('actions.kick', 'Kick'), ban: L('actions.ban', 'Ban')
+        };
+        $$('[data-player-action]').forEach(btn => {
+            const action = btn.dataset.playerAction;
+            if (btn.closest('.zvs-dock-action')) return;
+            if (action === 'inspect' && btn.closest('.zvs-inspector')) setTextIfChanged(btn, L('actions.pin', 'Pin'));
+            else if (actionLabels[action]) setTextIfChanged(btn, actionLabels[action]);
+        });
+        setTextIfChanged($('#settingsBtn'), L('actions.ui', 'UI'));
     }
 
     function post(action, payload = {}) {
@@ -538,6 +658,7 @@
         }
         state.data = merged;
         state.runtime = incoming.runtimeConfig || state.runtime || {};
+        if (incoming.runtimeConfig) applyRuntimeLocalization(state.runtime);
     }
 
     function openPanel(payload) {
@@ -631,6 +752,7 @@
         $('#compactMode').checked = ui.compactMode !== false;
         $('#themeSelect').value = ui.theme || 'visionary_dark';
         $('#dockVisible').checked = state.settings.dock?.enabled === true && state.floating.adminDock === true;
+        applyLocaleTexts();
         WindowManager.applyAll();
         syncRootVisibility();
     }
@@ -720,7 +842,7 @@
         list.sort((a, b) => riskScore(b) - riskScore(a) || Number(a.id) - Number(b.id));
         root.innerHTML = '';
         if (!list.length) {
-            root.innerHTML = `<div class="zvs-feed-item"><strong>Aucun joueur</strong><p>Refresh manuel ou filtre trop strict.</p></div>`;
+            root.innerHTML = `<div class="zvs-feed-item"><strong>${escapeHtml(L('main.noPlayers', 'Aucun joueur'))}</strong><p>${escapeHtml(L('main.noPlayersHint', 'Refresh manuel ou filtre trop strict.'))}</p></div>`;
             return;
         }
         for (const player of list) {
@@ -732,7 +854,7 @@
                 <span class="zvs-player-id">#${sanitizeText(player.id)}</span>
                 <span class="zvs-player-main">
                     <span class="zvs-player-name">${escapeHtml(player.name || 'Inconnu')}</span>
-                    <span class="zvs-player-meta">${Number(player.ping) || 0}ms · ${player.inVehicle ? 'veh' : 'ped'}${player.spawnProtection ? ' · protected' : ''}</span>
+                    <span class="zvs-player-meta">${Number(player.ping) || 0}ms · ${player.inVehicle ? L('main.vehicleShort', 'veh') : L('main.pedShort', 'ped')}${player.spawnProtection ? ' · ' + L('main.protectedShort', 'protected') : ''}</span>
                 </span>
                 <span class="zvs-risk-pill ${riskClass(score)}">${Math.round(score)}</span>`;
             btn.addEventListener('click', () => selectPlayer(player.id));
@@ -797,16 +919,16 @@
 
     function renderSelected() {
         const p = state.selectedPlayer;
-        $('#selectedTitle').textContent = p ? `${p.name || 'Joueur'} · ID ${p.id}` : 'Aucun joueur sélectionné';
-        $('#selectedSubtitle').textContent = p ? formatCoords(p.coords) : 'Sélectionne un joueur à gauche.';
+        $('#selectedTitle').textContent = p ? `${p.name || L('inspector.title', 'Joueur')} · ID ${p.id}` : L('main.noSelection', 'Aucun joueur sélectionné');
+        $('#selectedSubtitle').textContent = p ? formatCoords(p.coords) : L('main.selectPlayer', 'Sélectionne un joueur à gauche.');
         const score = riskScore(p);
-        $('#decisionText').textContent = score >= 70 ? 'Review now' : score >= 35 ? 'Watch' : 'Observe';
-        $('#decisionDetails').textContent = p?.risk?.lastDetection ? `Dernière détection : ${p.risk.lastDetection}` : 'UI read-only. Pas d’action punitive automatique.';
-        $('#selectedMetrics').innerHTML = metricHtml('HP', p?.health ?? '—') + metricHtml('Armure', p?.armor ?? '—') + metricHtml('Vitesse', fmtNumber(p?.speed, 'km/h')) + metricHtml('Ping', fmtNumber(p?.ping, 'ms'));
+        $('#decisionText').textContent = score >= 70 ? L('decision.review', 'Review now') : score >= 35 ? L('decision.watch', 'Watch') : L('decision.observe', 'Observe');
+        $('#decisionDetails').textContent = p?.risk?.lastDetection ? `${L('decision.lastDetection', 'Dernière détection')} : ${p.risk.lastDetection}` : L('main.readOnly', 'UI read-only. Pas d’action punitive automatique.');
+        $('#selectedMetrics').innerHTML = metricHtml('HP', p?.health ?? '—') + metricHtml(L('inspector.armor', 'Armure'), p?.armor ?? '—') + metricHtml(L('inspector.speed', 'Vitesse'), fmtNumber(p?.speed, 'km/h')) + metricHtml(L('inspector.ping', 'Ping'), fmtNumber(p?.ping, 'ms'));
         const timeline = $('#selectedTimeline');
         const id = Number(p?.id);
         const related = suspicious().filter(item => Number(item.src || item.target || item.player) === id).slice(0, 6);
-        timeline.innerHTML = related.length ? related.map(feedHtml).join('') : `<div class="zvs-feed-item"><strong>Timeline</strong><p>Aucun événement récent lié au joueur sélectionné.</p></div>`;
+        timeline.innerHTML = related.length ? related.map(feedHtml).join('') : `<div class="zvs-feed-item"><strong>${escapeHtml(L('main.timeline', 'Timeline'))}</strong><p>${escapeHtml(L('main.noRecentEvent', 'Aucun événement récent lié au joueur sélectionné.'))}</p></div>`;
     }
 
     function metricHtml(label, value) {
@@ -867,11 +989,11 @@
             btn.disabled = disabled;
         });
         const dockSelectionLabel = $('#dockSelectionLabel');
-        if (dockSelectionLabel) dockSelectionLabel.textContent = p ? `${sanitizeText(p.name, 'Joueur')} #${sanitizeText(p.id, '?')}` : 'Aucun joueur sélectionné';
+        if (dockSelectionLabel) dockSelectionLabel.textContent = p ? `${sanitizeText(p.name, L('inspector.title', 'Joueur'))} #${sanitizeText(p.id, '?')}` : L('dock.inspectorHint', 'Aucun joueur sélectionné');
         const noclipAvailable = runtime.features.staffNoClip === true;
         const noclipLabel = noclipAvailable
-            ? (state.noclip.enabled ? `NoClip: ON ${state.noclip.speed ? Math.round(state.noclip.speed) + 'm/s' : ''}`.trim() : 'NoClip: OFF')
-            : (runtime.features.externalNoClip ? 'NoClip: external' : 'NoClip: disabled');
+            ? (state.noclip.enabled ? `${L('actions.noclip', 'NoClip')}: ON ${state.noclip.speed ? Math.round(state.noclip.speed) + 'm/s' : ''}`.trim() : `${L('actions.noclip', 'NoClip')}: OFF`)
+            : (runtime.features.externalNoClip ? `${L('actions.noclip', 'NoClip')}: external` : `${L('actions.noclip', 'NoClip')}: disabled`);
         $('#noclipBtn').textContent = noclipLabel;
         $('#noclipBtn').disabled = !noclipAvailable;
         $('#noclipBtn').classList.toggle('is-live', noclipAvailable && state.noclip.enabled === true);
@@ -941,7 +1063,7 @@
     }
 
     function listOrEmpty(list, empty, mapper) {
-        return Array.isArray(list) && list.length ? list.map(mapper).join('') : `<div class="zvs-feed-item"><strong>${escapeHtml(empty)}</strong><p>Rien à afficher pour le moment.</p></div>`;
+        return Array.isArray(list) && list.length ? list.map(mapper).join('') : `<div class="zvs-feed-item"><strong>${escapeHtml(empty)}</strong><p>${escapeHtml(L('main.empty', 'Rien à afficher pour le moment.'))}</p></div>`;
     }
 
     function feedHtml(item) {
@@ -991,7 +1113,7 @@
                 title: 'Avertissement staff',
                 subtitle: name,
                 label: 'Message envoyé au joueur',
-                defaultText: 'Comportement suspect détecté.',
+                defaultText: L('forms.warn', 'Comportement suspect détecté.'),
                 confirm: 'Envoyer',
                 hint: 'Le joueur recevra une fenêtre NUI à fermer avec sa souris.',
                 severity: 'warn',
@@ -1001,20 +1123,20 @@
             return {
                 title: 'Exclure le joueur',
                 subtitle: name,
-                label: 'Motif du kick',
-                defaultText: 'Action staff.',
-                confirm: 'Kick',
+                label: L('dialogs.kickReason', 'Motif du kick'),
+                defaultText: L('forms.kick', 'Action staff.'),
+                confirm: L('actions.kick', 'Kick'),
                 hint: 'Le motif sera transmis au backend avant exclusion.',
                 severity: 'danger',
             };
         }
         return {
-            title: 'Bannir le joueur',
+            title: L('dialogs.banTitle', 'Bannir le joueur'),
             subtitle: name,
-            label: 'Motif du ban',
-            defaultText: 'Cheat / exploitation détectée.',
-            confirm: 'Ban',
-            hint: 'Vérifie le motif avant validation. Aucun prompt navigateur n’est utilisé.',
+            label: L('dialogs.banReason', 'Motif du ban'),
+            defaultText: L('forms.ban', 'Cheat / exploitation détectée.'),
+            confirm: L('actions.ban', 'Ban'),
+            hint: L('dialogs.actionHint', 'Vérifie le motif avant validation. Aucun prompt navigateur n’est utilisé.'),
             severity: 'danger',
         };
     }
@@ -1056,7 +1178,7 @@
         const input = $('#actionReason');
         const reason = (input?.value || '').trim();
         if (!reason) {
-            toast('Motif requis.');
+            toast(L('dialogs.reasonRequired', 'Motif requis.'));
             input?.focus();
             return;
         }
@@ -1097,12 +1219,12 @@
         state.screenshot = {
             active: image !== '',
             image,
-            title: 'Capture reçue',
+            title: L('dialogs.screenshotReceived', 'Capture reçue'),
             subtitle: `${targetName}${data.target ? ` #${data.target}` : ''}`,
-            meta: uploadStatus === 'ok' ? `${reason} · upload disponible` : `${reason} · capture locale`,
+            meta: uploadStatus === 'ok' ? `${reason} · ${L('dialogs.uploadAvailable', 'upload disponible')}` : `${reason} · ${L('dialogs.localCapture', 'capture locale')}`,
         };
         if (!image) {
-            toast('Capture reçue, mais aucune image exploitable.');
+            toast(L('dialogs.screenshotNoImage', 'Capture reçue, mais aucune image exploitable.'));
             return;
         }
         syncRootVisibility();
@@ -1353,6 +1475,7 @@
             case 'runtimeConfig': {
                 const runtimeVisibility = captureRuntimeWindowVisibility();
                 state.runtime = msg.data?.runtimeConfig || msg.data || {};
+                applyRuntimeLocalization(state.runtime);
                 if (msg.data?.adminSettings) state.settings = normalizeSettings(msg.data.adminSettings);
                 restoreRuntimeWindowVisibility(runtimeVisibility);
                 applyUiSettings();
@@ -1369,11 +1492,11 @@
                 restoreRuntimeWindowVisibility(runtimeVisibility);
                 applyUiSettings();
                 scheduleRender();
-                toast(msg.data?.reset ? 'UI réinitialisée.' : 'UI sauvegardée.');
+                toast(msg.data?.reset ? L('dialogs.reset', 'UI réinitialisée.') : L('dialogs.saved', 'UI sauvegardée.'));
                 break;
             }
             case 'appearanceSaved':
-                toast('Apparence sauvegardée.');
+                toast(L('dialogs.saved', 'UI sauvegardée.'));
                 break;
             case 'spectateInfo':
                 renderSpectate(msg.data || {});

@@ -1,47 +1,40 @@
-# Screenshot-basic setup
+# Screenshots and evidence capture
 
-Visionary Shield uses the standalone `screenshot-basic` resource for capture and evidence workflows.
+Visionary Shield supports two kinds of screenshots:
 
-## Install
+1. Repository screenshots used for GitHub presentation.
+2. Runtime evidence screenshots requested by staff through `screenshot-basic`.
 
-Place `screenshot-basic` in your resources folder and start it before `zvs-ac`.
+## Repository screenshots
+
+The README uses these files:
+
+```text
+assets/screenshots/dashboard.png
+assets/screenshots/inspector.png
+assets/screenshots/settings.png
+assets/screenshots/quick-tools.png
+```
+
+Replace them when the interface changes significantly. Keep images clean, readable and free of private player data when possible.
+
+## Runtime screenshots
+
+Start `screenshot-basic` before Visionary Shield:
 
 ```cfg
 ensure screenshot-basic
 ensure zvs-ac
 ```
 
-## Validate
+If a screenshot webhook is configured, evidence can be uploaded. If not, the admin still receives a local NUI preview when possible.
 
-From the admin dashboard, select a player and press **Capture**.
+## Troubleshooting
 
-Expected result:
+If screenshots do not appear:
 
-- if a screenshot webhook is configured, the capture is uploaded;
-- if no upload route is configured, the capture is shown in the admin NUI preview when available;
-- if `screenshot-basic` is missing or stopped, the admin receives a clear error.
-
-## Common issues
-
-### Capture unavailable
-
-Check:
-
-```text
-ensure screenshot-basic
-```
-
-Make sure the resource is not renamed.
-
-### Upload fails
-
-Check:
-
-- webhook URL
-- Discord rate limits
-- server outbound network access
-- image size / quality settings
-
-### Blank image
-
-Try lowering quality or switching encoding in `shared/config.lua`.
+- confirm `screenshot-basic` is started;
+- confirm no resource renamed its exports;
+- check server console for screenshot-related warnings;
+- test without Discord upload first;
+- verify that the target player is fully loaded.

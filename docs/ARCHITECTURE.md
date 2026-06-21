@@ -32,3 +32,14 @@ data/
 ## Notes for contributors
 
 Keep changes small, testable, and documented. Avoid introducing permanent client threads unless they are strictly required.
+
+
+## Localization flow
+
+Localization is intentionally server-config driven:
+
+1. Server reads `zVS.Config.Localization` from `shared/config.lua`.
+2. Runtime config sends the selected locale and fallback strings to the NUI.
+3. The NUI applies labels without requiring UI source edits.
+
+This keeps translations friendly for server owners while preserving a compact frontend.

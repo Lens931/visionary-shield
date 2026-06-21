@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.1 - Localized open-source release
+
+- Added config-driven UI localization.
+- Added updated screenshots for the public README.
+- Added localization and community documentation.
+- Improved repository presentation for GitHub release.
+- Fixed manifest metadata for standard FiveM loading.
+
 ## 1.7.0 - Open-source GitHub release
 
 - Reworked repository packaging for public development.

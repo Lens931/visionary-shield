@@ -355,8 +355,20 @@ do
         local adminPreviewEnabled = false -- production ImGui NUI: preview/clone/camera are intentionally removed.
         local livePreviewEnabled = false
         local adminDockEnabled = adminDock.Enabled ~= false
+        local localizationCfg = type(Config.Localization) == 'table' and Config.Localization or {}
+        local locales = type(localizationCfg.Locales) == 'table' and localizationCfg.Locales or {}
+        local defaultLocale = tostring(localizationCfg.DefaultLocale or 'en'):lower()
+        local fallbackLocale = tostring(localizationCfg.FallbackLocale or 'en'):lower()
+        if type(locales[defaultLocale]) ~= 'table' then defaultLocale = fallbackLocale end
         return {
             profilePerformance = tostring(Config.PerformanceProfile or 'default'),
+            localization = {
+                enabled = localizationCfg.Enabled ~= false,
+                locale = defaultLocale,
+                fallback = fallbackLocale,
+                strings = type(locales[defaultLocale]) == 'table' and locales[defaultLocale] or {},
+                fallbackStrings = type(locales[fallbackLocale]) == 'table' and locales[fallbackLocale] or {},
+            },
             performanceProfile = tostring(Config.PerformanceProfile or 'default'),
             StaffNoClip = {
                 Enabled = staffNoClipEnabled,

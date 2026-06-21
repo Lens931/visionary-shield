@@ -5,6 +5,75 @@ zVS = zVS or {}
 ---@class zVSConfig
 zVS.Config = {
     PerformanceProfile = 'production_zerofootprint',
+
+    -- UI localization. Add your own language by copying one locale table and changing DefaultLocale.
+    Localization = {
+        Enabled = true,
+        DefaultLocale = 'en',
+        FallbackLocale = 'en',
+        Locales = {
+            en = {
+                app = {
+                    players = 'players', risk = 'risk', bans = 'bans', production = 'production',
+                    dashboard = 'Dashboard', close = 'Close', refresh = 'Refresh', lock = 'Lock', minimize = 'Minimize', maximize = 'Maximize'
+                },
+                main = {
+                    playersTitle = 'Players', search = 'Name, ID, ping...', all = 'All', risk = 'Risk', vehicle = 'Vehicle', protected = 'Protected',
+                    noPlayers = 'No players', noPlayersHint = 'Manual refresh or filter too strict.',
+                    noSelection = 'No player selected', selectPlayer = 'Select a player on the left.', readOnly = 'UI read-only. Staff keeps the final decision.',
+                    overview = 'Overview', history = 'Audit', defenses = 'Runtime', alerts = 'Alerts', notes = 'Notes', damage = 'Damage',
+                    topRisk = 'Top risk', approvals = 'Approvals', recentAudit = 'Recent audit', runtimeReal = 'Real runtime', noGhost = 'no ghost options', serverStates = 'server states',
+                    timeline = 'Timeline', noRecentEvent = 'No recent event for the selected player.', empty = 'Nothing to display yet.'
+                },
+                actions = {
+                    inspect = 'Inspect', pin = 'Pin', spectate = 'Spectate', goto = 'Goto', bring = 'Bring', freeze = 'Freeze', heal = 'Heal', capture = 'Capture', warn = 'Warn', kick = 'Kick', ban = 'Ban', noclip = 'NoClip', ui = 'UI', validate = 'Confirm', cancel = 'Cancel'
+                },
+                inspector = {
+                    title = 'Player', name = 'Name', id = 'ID', health = 'Health', armor = 'Armor', speed = 'Speed', ping = 'Ping', risk = 'Risk', position = 'Position', vehicle = 'Vehicle', protection = 'Protection'
+                },
+                settings = {
+                    title = 'UI Settings', interface = 'Interface', active = 'active', scale = 'Scale', text = 'Text', theme = 'Theme', language = 'Language', languageHint = 'configured in shared/config.lua', windows = 'Windows', persistent = 'persistent', compact = 'Compact mode', dock = 'Floating quick dock', note = 'The dashboard can close without closing floating windows. Visibility is runtime; position, size, lock and opacity remain saved.', reset = 'Reset UI', save = 'Save now'
+                },
+                dock = {
+                    title = 'Quick Tools', live = 'live', refreshHint = 'Update data', inspectorHint = 'No player selected', spectateHint = 'Watch the target', gotoHint = 'Go to target', noclipDisabled = 'Unavailable', settingsHint = 'Scale, theme and windows', windows = 'Windows', runtime = 'runtime', closeDashboard = 'Close dashboard', hideDock = 'Hide dock'
+                },
+                dialogs = {
+                    staffAction = 'Staff action', target = 'Target', reason = 'Reason', reasonPlaceholder = 'Write a clear and short reason...', actionHint = 'This action is sent to the zVS backend. Browser prompts are not used.', understood = 'Understood', screenshotReceived = 'Screenshot received', evidence = 'Evidence', screenshotAvailable = 'Screenshot available.', localCapture = 'local screenshot', uploadAvailable = 'upload available', saved = 'UI saved.', reset = 'UI reset.'
+                },
+                forms = { warn = 'Suspicious behaviour detected.', kick = 'Staff action.', ban = 'Cheat / exploit suspicion.' }
+            },
+            fr = {
+                app = {
+                    players = 'joueurs', risk = 'risque', bans = 'bans', production = 'production',
+                    dashboard = 'Dashboard', close = 'Fermer', refresh = 'Rafraîchir', lock = 'Verrouiller', minimize = 'Réduire', maximize = 'Agrandir'
+                },
+                main = {
+                    playersTitle = 'Joueurs', search = 'Nom, ID, ping...', all = 'Tous', risk = 'Risque', vehicle = 'Véhicule', protected = 'Protégés',
+                    noPlayers = 'Aucun joueur', noPlayersHint = 'Refresh manuel ou filtre trop strict.',
+                    noSelection = 'Aucun joueur sélectionné', selectPlayer = 'Sélectionne un joueur à gauche.', readOnly = 'UI read-only. Pas d’action punitive automatique.',
+                    overview = 'Overview', history = 'Audit', defenses = 'Runtime', alerts = 'Alertes', notes = 'Notes', damage = 'Damage',
+                    topRisk = 'Top risque', approvals = 'Approbations', recentAudit = 'Audit récent', runtimeReal = 'Runtime réel', noGhost = 'pas d’options fantômes', serverStates = 'états serveur',
+                    timeline = 'Timeline', noRecentEvent = 'Aucun événement récent lié au joueur sélectionné.', empty = 'Rien à afficher pour le moment.'
+                },
+                actions = {
+                    inspect = 'Inspect', pin = 'Pin', spectate = 'Spectate', goto = 'Goto', bring = 'Bring', freeze = 'Freeze', heal = 'Heal', capture = 'Capture', warn = 'Warn', kick = 'Kick', ban = 'Ban', noclip = 'NoClip', ui = 'UI', validate = 'Valider', cancel = 'Annuler'
+                },
+                inspector = {
+                    title = 'Joueur', name = 'Nom', id = 'ID', health = 'Santé', armor = 'Armure', speed = 'Vitesse', ping = 'Ping', risk = 'Risque', position = 'Position', vehicle = 'Véhicule', protection = 'Protection'
+                },
+                settings = {
+                    title = 'Paramètres UI', interface = 'Interface', active = 'actif', scale = 'Échelle', text = 'Texte', theme = 'Thème', language = 'Langue', languageHint = 'configurée dans shared/config.lua', windows = 'Fenêtres', persistent = 'persistant', compact = 'Compact mode', dock = 'Dock flottant rapide', note = 'Le dashboard peut se fermer sans fermer les fenêtres flottantes. La visibilité est runtime ; position, taille, lock et opacité restent sauvegardés.', reset = 'Reset UI', save = 'Sauvegarder maintenant'
+                },
+                dock = {
+                    title = 'Outils rapides', live = 'live', refreshHint = 'Mettre à jour les données', inspectorHint = 'Aucun joueur sélectionné', spectateHint = 'Suivre la cible', gotoHint = 'Aller sur la cible', noclipDisabled = 'Indisponible', settingsHint = 'Échelle, thème et fenêtres', windows = 'Fenêtres', runtime = 'runtime', closeDashboard = 'Fermer dashboard', hideDock = 'Masquer dock'
+                },
+                dialogs = {
+                    staffAction = 'Action staff', target = 'Cible', reason = 'Motif', reasonPlaceholder = 'Indique un motif clair et court...', actionHint = 'Cette action sera envoyée au backend zVS. Aucun prompt navigateur n’est utilisé.', understood = 'J’ai compris', screenshotReceived = 'Capture reçue', evidence = 'Evidence', screenshotAvailable = 'Capture disponible.', localCapture = 'capture locale', uploadAvailable = 'upload disponible', saved = 'UI sauvegardée.', reset = 'UI réinitialisée.'
+                },
+                forms = { warn = 'Comportement suspect détecté.', kick = 'Action staff.', ban = 'Suspicion de cheat / exploitation.' }
+            }
+        }
+    },
     --- Toggle bypass behaviour for trusted staff.
     AdminBypass = true,
 

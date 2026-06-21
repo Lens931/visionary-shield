@@ -52,3 +52,22 @@ Each admin can save layout preferences. To reset only your own UI:
 ## Performance
 
 The default profile is tuned for low idle usage. Do not enable debug mode on public production servers unless you are actively diagnosing an issue.
+
+
+## Localization
+
+The admin NUI language is configured from `shared/config.lua`:
+
+```lua
+Localization = {
+    Enabled = true,
+    DefaultLocale = 'en',
+    FallbackLocale = 'en',
+    Locales = {
+        en = { ... },
+        fr = { ... },
+    }
+}
+```
+
+See [Localization guide](LOCALIZATION.md) for adding new languages.

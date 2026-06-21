@@ -5,7 +5,7 @@ lua54 'yes'
 
 author 'Visionary Shield contributors'
 description 'Open-source FiveM/QBCore security and admin tooling resource'
-version '1.7.0-open-source-github-release'
+version '1.7.1-open-source-localized-release'
 
 ui_page 'ui/index.html'
 
@@ -18,7 +18,6 @@ files {
     'ui/translations.js',
     'data/*.json'
 }
-
 
 shared_scripts {
     'shared/config.lua'
