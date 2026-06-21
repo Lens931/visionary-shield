@@ -5,7 +5,7 @@ lua54 'yes'
 
 author 'Visionary Shield contributors'
 description 'Open-source FiveM/QBCore security and admin tooling resource'
-version '1.7.1-open-source-localized-release'
+version '1.7.3-open-source-deployment-polish'
 
 ui_page 'ui/index.html'
 

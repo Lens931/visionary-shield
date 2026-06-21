@@ -1,0 +1,19 @@
+# Runtime / generated data
+data/admin_settings/*.json
+data/*.bak
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archives
+*.zip
+*.rar
+*.7z
+
+# Secrets
+.env
+*.secret

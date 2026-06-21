@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.7.2
+
+- Fixed a Lua configuration parsing issue in the localization table.
+- Kept localization keys compatible with the NUI runtime.
+
+# Changelog
+
 ## 1.7.1 - Localized open-source release
 
 - Added config-driven UI localization.
@@ -25,3 +32,11 @@
 - Added NUI-native moderation dialogs.
 - Improved screenshot/evidence handling.
 - Improved floating window persistence.
+
+## v1.7.3 - GitHub deployment polish
+
+- Documentation polish for public GitHub usage.
+- Added fast local deployment helpers.
+- Improved localization notes and Discord locale configuration.
+- Adjusted spectate defaults toward safer camera-only behavior.
+- Minor release packaging cleanup.
